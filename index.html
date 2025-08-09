@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tỏ Tình Bí Mật 💌</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#ff6b81; --muted:#9aa4b2;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;background:linear-gradient(135deg,var(--bg),#071028);color:#eef2f7;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+    .wrap{max-width:980px;width:100%;display:grid;grid-template-columns:1fr 460px;gap:24px}
+    @media(max-width:900px){.wrap{grid-template-columns:1fr;}}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02)); padding:20px;border-radius:16px;box-shadow:0 6px 24px rgba(2,6,23,0.6);}
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 14px;color:var(--muted)}
+    label{display:block;font-size:13px;color:var(--muted);margin-top:12px}
+    input[type=text], textarea, select{width:100%;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:inherit;outline:none}
+    textarea{min-height:120px;resize:vertical}
+    .row{display:flex;gap:8px}
+    .btn{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;border:0;cursor:pointer;background:var(--accent);color:white;font-weight:600}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+    .preview{display:flex;flex-direction:column;gap:12px}
+    .card.preview-card{padding:28px;align-items:flex-start;text-align:left}
+    .heart{font-size:36px}
+    .small{font-size:13px;color:var(--muted)}
+    .actions{display:flex;gap:8px;margin-top:12px}
+    .copy{background:#162435;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.03)}
+    .notice{font-size:13px;color:#ffdbe2;background:rgba(255,107,129,0.06);padding:10px;border-radius:10px}
+    footer{color:var(--muted);font-size:12px;margin-top:12px}
+    .confetti{position:fixed;left:0;right:0;top:0;bottom:0;pointer-events:none}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>🎯 Tạo trang tỏ tình cho em trai khóa dưới</h1>
+      <p class="lead">Điền nội dung tỏ tình, chọn theme và (tuỳ chọn) mật khẩu để chỉ em ấy mở được.</p>
+
+      <label>Tên người nhận</label>
+      <input id="recipient" type="text" placeholder="ví dụ: Minh" />
+
+      <label>Nội dung tỏ tình</label>
+      <textarea id="message" placeholder="Viết điều muốn nói... (gợi ý: tớ thích cậu từ lần gặp ở thư viện)"></textarea>
+
+      <label>Chọn phong cách</label>
+      <select id="theme">
+        <option value="pink">Dịu dàng hồng</option>
+        <option value="classic">Lãng mạn cổ điển</option>
+        <option value="playful">Tưng tửng dễ thương</option>
+      </select>
+
+      <label>Mật khẩu mở (tùy chọn)</label>
+      <input id="pass" type="text" placeholder="Nhập mật khẩu để bảo mật (không bắt buộc)" />
+
+      <div style="margin-top:14px" class="row">
+        <button id="gen" class="btn">Tạo link tỏ tình</button>
+        <button id="previewBtn" class="btn ghost">Xem trước</button>
+      </div>
+
+      <div style="margin-top:14px" id="resultArea" hidden>
+        <p class="small">Link tỏ tình:</p>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:6px">
+          <input id="resultLink" type="text" readonly style="flex:1" />
+          <button id="copy" class="copy">Sao chép</button>
+        </div>
+        <p class="small" style="margin-top:8px">Lưu ý: link này chứa nội dung mã hóa trong <code>URL hash</code>. Bạn có thể dán nó vào messenger hoặc bio để gửi.</p>
+      </div>
+
+      <div style="margin-top:14px" class="notice">
+        Mẹo: nếu muốn bí mật tuyệt đối, đặt mật khẩu và chỉ gọi điện cho em ấy để cho biết mật khẩu khi đã mở link.
+      </div>
+
+      <footer>Host file này trên GitHub Pages, Vercel hoặc Netlify để gửi link có dạng: <span id="exampleHost">(mở xem trước để thấy)</span></footer>
+    </div>
+
+    <div class="card preview-card">
+      <div class="preview">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="small">Xem trước</div>
+            <div id="previewTitle" style="font-weight:700;font-size:18px;margin-top:6px">Một lời nhắn bí mật</div>
+          </div>
+          <div class="heart">💌</div>
+        </div>
+
+        <div id="previewMessage" style="min-height:120px;padding:12px;border-radius:12px;background:rgba(255,255,255,0.02);">Nội dung sẽ hiển thị ở đây khi nhấn 'Xem trước' hoặc khi em ấy mở link.</div>
+
+        <div class="actions">
+          <button id="reveal" class="btn ghost">Mở (giả lập)</button>
+          <button id="downloadBtn" class="btn">Tải file HTML</button>
+        </div>
+
+        <div id="downloadNote" class="small" style="display:none">File HTML đã tạo — tải về và host hoặc gửi trực tiếp.</div>
+      </div>
+    </div>
+  </div>
+
+  <canvas id="confetti" class="confetti" width="800" height="600" style="display:none"></canvas>
+
+  <script>
+    // helper encode/decode
+    function encodePayload(obj){
+      try{
+        return btoa(encodeURIComponent(JSON.stringify(obj)));
+      }catch(e){return ''}
+    }
+    function decodePayload(s){
+      try{
+        return JSON.parse(decodeURIComponent(atob(s)));
+      }catch(e){return null}
+    }
+
+    const recipient = document.getElementById('recipient');
+    const message = document.getElementById('message');
+    const theme = document.getElementById('theme');
+    const pass = document.getElementById('pass');
+    const gen = document.getElementById('gen');
+    const resultArea = document.getElementById('resultArea');
+    const resultLink = document.getElementById('resultLink');
+    const copyBtn = document.getElementById('copy');
+    const previewBtn = document.getElementById('previewBtn');
+    const previewTitle = document.getElementById('previewTitle');
+    const previewMessage = document.getElementById('previewMessage');
+    const reveal = document.getElementById('reveal');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const downloadNote = document.getElementById('downloadNote');
+    const exampleHost = document.getElementById('exampleHost');
+
+    function makeLink(){
+      const payload = {to: recipient.value||'Bạn ấy', msg: message.value||'...', theme: theme.value||'pink', pass: pass.value||''};
+      const code = encodePayload(payload);
+      const base = location.href.split('#')[0];
+      return base + '#' + code;
+    }
+
+    gen.addEventListener('click', ()=>{
+      const link = makeLink();
+      resultArea.hidden = false;
+      resultLink.value = link;
+    });
+
+    copyBtn.addEventListener('click', ()=>{
+      resultLink.select();
+      document.execCommand('copy');
+      copyBtn.textContent = 'Đã sao chép';
+      setTimeout(()=>copyBtn.textContent='Sao chép',1400);
+    });
+
+    previewBtn.addEventListener('click', ()=>{
+      previewTitle.textContent = 'Gửi tới: ' + (recipient.value||'Bạn ấy');
+      previewMessage.textContent = message.value || 'Bạn chưa viết gì — hãy thử nhập để xem trước.';
+      // quick theme
+      applyTheme(theme.value);
+    });
+
+    reveal.addEventListener('click', ()=>{
+      // reveal simulation: if password set, ask for it
+      const p = pass.value;
+      if(p){
+        const attempt = prompt('Nhập mật khẩu mở:');
+        if(attempt!==p){ alert('Mật khẩu sai 🥲'); return; }
+      }
+      confettiBurst();
+      alert('Đã mở — chúc cậu may mắn!');
+    });
+
+    function applyTheme(t){
+      if(t==='pink') document.body.style.background='linear-gradient(135deg,#0f1724,#0b1630)';
+      if(t==='classic') document.body.style.background='linear-gradient(135deg,#02111b,#072233)';
+      if(t==='playful') document.body.style.background='linear-gradient(135deg,#08121a,#1b1638)';
+    }
+
+    // generate downloadable HTML file (same single-file page but with hash)
+    downloadBtn.addEventListener('click', ()=>{
+      const link = makeLink();
+      const html = `<!doctype html>\n<html lang="vi">\n<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tin nhắn bí mật</title></head><body><script>location.href='${link}';</script></body></html>`;
+      const blob = new Blob([html], {type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'tin-nhan-bi-mat.html'; document.body.appendChild(a); a.click(); a.remove();
+      downloadNote.style.display='block';
+    });
+
+    // on load: if hash present, decode and show reveal flow
+    (function(){
+      if(location.hash && location.hash.length>1){
+        const code = location.hash.slice(1);
+        const data = decodePayload(code);
+        if(data){
+          // simple UI replacement
+          document.body.innerHTML = `
+            <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#071428,#0b1b2e);color:#fff;font-family:Inter,Arial">
+              <div style="max-width:720px;background:rgba(255,255,255,0.03);padding:24px;border-radius:16px;text-align:center">
+                <h2 style="margin:0 0 6px">Tin nhắn cho ${escapeHtml(data.to)}</h2>
+                <p style="color:#b8c6d6;margin:0 0 18px">Nhấn nút để xem nội dung nhé 💌</p>
+                <div id="box" style="padding:16px;border-radius:12px;background:rgba(0,0,0,0.15);min-height:120px;display:flex;align-items:center;justify-content:center">******</div>
+                <div style="margin-top:16px;display:flex;gap:8px;justify-content:center">
+                  <button id="openBtn" style="padding:10px 14px;border-radius:10px;border:0;background:#ff6b81;color:#fff;font-weight:700">Mở tin nhắn</button>
+                  <button id="backBtn" style="padding:10px 14px;border-radius:10px;background:transparent;border:1px solid rgba(255,255,255,0.06);color:#fff">Quay lại</button>
+                </div>
+              </div>
+            </div>
+          `;
+          // attach events after slight delay
+          setTimeout(()=>{
+            const openBtn = document.getElementById('openBtn');
+            const box = document.getElementById('box');
+            const backBtn = document.getElementById('backBtn');
+            openBtn.addEventListener('click', ()=>{
+              if(data.pass){
+                const tryP = prompt('Nhập mật khẩu:');
+                if(tryP!==data.pass){ alert('Mật khẩu không đúng.'); return; }
+              }
+              box.textContent = data.msg;
+              confettiBurst();
+            });
+            backBtn.addEventListener('click', ()=> location.href = location.href.split('#')[0]);
+          },80);
+        }
+      }
+    })();
+
+    // confetti animation (simple)
+    function confettiBurst(){
+      const cvs = document.getElementById('confetti');
+      if(!cvs) return;
+      cvs.style.display='block';
+      const ctx = cvs.getContext('2d');
+      cvs.width = innerWidth; cvs.height = innerHeight;
+      let pieces = [];
+      for(let i=0;i<80;i++) pieces.push({x:Math.random()*cvs.width,y:Math.random()*-cvs.height,vy:2+Math.random()*6,rv:Math.random()*6,sz:6+Math.random()*8,clr:['#ff6b81','#ffd166','#6bf0c3','#8fa3ff'][Math.floor(Math.random()*4)]});
+      let t=0;
+      function step(){
+        ctx.clearRect(0,0,cvs.width,cvs.height);
+        for(const p of pieces){
+          p.x += Math.sin(t/10 + p.rv)*2; p.y += p.vy; p.rv += 0.01;
+          ctx.fillStyle = p.clr; ctx.fillRect(p.x,p.y,p.sz, p.sz*0.6);
+        }
+        t++;
+        if(pieces.some(p=>p.y < cvs.height+100)) requestAnimationFrame(step); else { cvs.style.display='none'; }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function escapeHtml(s){return String(s).replace(/[&<>"']/g, function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m]});}
+
+    // show example host
+    exampleHost.textContent = location.href.split('#')[0] + '#[mã hóa]';
+  </script>
+</body>
+</html>
+      
